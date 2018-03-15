@@ -1,0 +1,136 @@
+#	Automate TP-link plugs
+
+#	Info: http://itnerd.space/2017/06/19/how-to-authenticate-to-tp-link-cloud-api/
+#	Info: http://itnerd.space/2017/05/21/how-to-get-the-tp-link-hs100-cloud-end-point-url/
+#	Info: http://itnerd.space/2017/01/22/how-to-control-your-tp-link-hs100-smartplug-from-internet/
+
+#	--------------------------------------------------------------
+#	Get a UUID from here: https://www.uuidgenerator.net/version4
+#	--------------------------------------------------------------
+
+#	Other endpoints:
+
+- https://aps1-wap.tplinkcloud.com
+- https://eu-wap.tplinkcloud.com
+- https://use1-wap.tplinkcloud.com
+
+#	--------------------------------------------------------------
+#	Get an API token
+#	--------------------------------------------------------------
+
+#	Use this site to post it: https://www.hurl.it/
+
+#	Destination: POST to https://wap.tplinkcloud.com
+#	Headers Content-Type application/json
+#	Parameters - add body (The json below)
+
+{
+ "method": "login",
+ "params": {
+ "appType": "Kasa_Android",
+ "cloudUserName": "username",
+ "cloudPassword": "password",
+ "terminalUUID": "uuid"
+ }
+}
+
+#	The response from the above will provide a token
+
+{
+   "error_code":0,
+   "result":{
+      "accountId":"accountid",
+      "regTime":"2018-01-20 11:48:41",
+      "email":"someone@gmail.com",
+      "token":"token"
+   }
+}
+
+#	--------------------------------------------------------------
+#	Get the Cloud Endpoint URL
+#	--------------------------------------------------------------
+
+#	Use this site to post it: https://www.hurl.it/
+
+#	POST to https://wap.tplinkcloud.com?token=<token>
+#	Parameters - add body (the json below)
+
+{"method":"getDeviceList"}
+
+{
+   "error_code":0,
+   "result":{
+      "deviceList":[
+         {
+            ...
+         },
+         {
+            ...
+         }
+      ]
+   }
+}
+
+#	--------------------------------------------------------------
+#	Test control of the plug
+#	--------------------------------------------------------------
+
+#	Use this site to post it: https://www.hurl.it/
+
+#	POST to https://wap.tplinkcloud.com?token=<token>
+#	Parameters - add body (the json below)
+
+#	Json to list all device details
+
+{
+ "method":"passthrough",
+ "params":{
+ "deviceId":"DEVICEID",
+ "requestData": "{\"system\":{\"get_sysinfo\":null},\"emeter\":{\"get_realtime\":null}}"
+ }
+}
+
+{
+   "error_code":0,
+   "result":{
+      "responseData":"{
+      	\"system\":{
+      		...
+      		}
+      	},
+      \"emeter\":{
+      	\"get_realtime\":{
+      		\"current\":9.523735,
+      		\"voltage\":238.481137,
+      		\"power\":2240.264575,
+      		\"total\":268.850000,
+      		\"err_code\":0
+      	}
+      }
+    }"
+   }
+}
+
+#	--------------------------------------------------------------
+#	Turn plug on
+#	--------------------------------------------------------------
+
+{
+ "method":"passthrough",
+ "params":{
+ "deviceId":"DEVICEID",
+ "requestData":"{\"system\":{\"set_relay_state\":{\"state\":1}}}"
+ }
+}
+
+#	--------------------------------------------------------------
+#	Turn plug off
+#	--------------------------------------------------------------
+
+{
+ "method":"passthrough",
+ "params":{
+ "deviceId":"DEVICEID",
+ "requestData":"{\"system\":{\"set_relay_state\":{\"state\":0}}}"
+ }
+}
